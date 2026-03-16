@@ -1,105 +1,78 @@
 package com.nicolas.Pacman.model;
-import java.util.ArrayList;
 public class Fantasma extends Personaje{
     
 // Atributos declarados
-private Coordenadas posInicial;
-private boolean asustado;   // estado , si estan asustados o normales
-private ArrayList<Fantasma> ghost_array;
 
-// Molde para fantasmas / constructor 
+private boolean asustado; 
 
-public Fantasma(Coordenadas posicion, boolean asustado,Coordenadas posInicial) {
-
-    this.posicion= posicion;
-    this.asustado = asustado;
-    this.posInicial = posInicial;
-}
-
-// constructor para crear a nuestros 4 fantasmas e inicializarlos 
-
-public Fantasma() { // creamos los 4 en la cajita de la mitad 
-
-    this.asustado = false; // parametrizamos y asi podemos cambiar el estado de los 4 con cambiar este boolean (asustado)
-
-    ghost_array = new ArrayList<>(); // generamos el espacio en memoria 
-
-    // en cada indice añadimos un fantasma 
-    // Creamos una pocisionActual que puede variar y una pocision inicial fija para cuando los fantasmas mueran y tengan que regresar a base 
-
-    ghost_array.add(new Fantasma(new Coordenadas(10, 7), asustado, new Coordenadas(10, 7)));
-    ghost_array.add(new Fantasma(new Coordenadas(10, 8), asustado, new Coordenadas(10, 8)));
-    ghost_array.add(new Fantasma(new Coordenadas(11, 7), asustado, new Coordenadas(11, 7)));
-    ghost_array.add(new Fantasma(new Coordenadas(11, 8), asustado, new Coordenadas(11, 8)));
+public Fantasma(Direccion direccion_actual, Coordenadas posicion, Coordenadas spawn) {
+        super(direccion_actual, posicion, spawn);
+        this.asustado = false;
+    }
 
 
-}
-
-
-@Override
 public void mover(Direccion direccion) {
 
+    int x = this.posicion.getX();
+    int y = this.posicion.getY();
+    
     switch(direccion){
  
-        case DERECHA : posicion = new Coordenadas(posicion.getY(), posicion.getX()+1); 
+        case DERECHA : this.posicion = new Coordenadas(x+1, y); 
             this.direccion_actual = Direccion.DERECHA;
+            break;
 
-        case IZQUIERDA : posicion = new Coordenadas(posicion.getY(), posicion.getX()-1); 
+        case IZQUIERDA : this.posicion = new Coordenadas(x-1, y); 
             this.direccion_actual = Direccion.IZQUIERDA;
+            break;
         
-        case ARRIBA : posicion = new Coordenadas(posicion.getY()+1, posicion.getX()); 
+        case ARRIBA : this.posicion = new Coordenadas(x, y-1); 
             this.direccion_actual = Direccion.ARRIBA;
+            break;
         
-        case ABAJO : posicion = new Coordenadas(posicion.getY()-1, posicion.getX());
+        case ABAJO : this.posicion = new Coordenadas(x, y+1);
             this.direccion_actual = Direccion.ABAJO;
-
+            break;
         }
-    
 }
 
 public Coordenadas nuevoFantasma(Direccion direccion){
 
+    int x = this.posicion.getX();
+    int y = this.posicion.getY();
+
     switch(direccion){
  
-        case DERECHA : return new Coordenadas(posicion.getY(), posicion.getX()+1); 
-        
-            
-        case IZQUIERDA : return  new Coordenadas(posicion.getY(), posicion.getX()-1); 
-        
-        
-        case ARRIBA : return  new Coordenadas(posicion.getY()+1, posicion.getX()); 
-        
-        
-        case ABAJO : return  new Coordenadas(posicion.getY()-1, posicion.getX());
-        
-        }
-
-        return null; // default 
-        }
+        case DERECHA : return new Coordenadas(x+1, y); 
+        case IZQUIERDA : return  new Coordenadas(x-1, y); 
+        case ARRIBA : return  new Coordenadas(x, y-1); 
+        case ABAJO : return  new Coordenadas(x, y+1);
+}
+        return null; 
+ }
 
         public void seASustan(){
             this.asustado = true;
         }
 
-        public boolean estadoFantasma(){
+        public boolean Asustados(){
             return this.asustado;
         }
 
-        public void fantasmaMuere(int i){ // le pasamos como parametro un indice para saber cual fue el fantasma que murio 
-             ghost_array.get(i).posicion = ghost_array.get(i).posInicial;
+        public void fantasmaMuere( ){ 
+              this.posicion = this.spawn;
         }
         
-        public int cantidadFantasmas(){
-            return ghost_array.size();
-        }
-
-        public Coordenadas accederFantasma(int i ){ // nos retorna las coordenadas de algun fantasma en el arreglo 
-            return ghost_array.get(i).posicion;
-        }
-
-        public Direccion dirActualGhost(){
+        public Direccion dirActualFantasma(){
             return this.direccion_actual;
         }
+
+        public Coordenadas ubicacion(){
+            return this.posicion;
+        }
+       
+
+
 }
 
 

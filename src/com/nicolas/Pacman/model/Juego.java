@@ -1,147 +1,152 @@
 package com.nicolas.Pacman.model;
 
-public class Juego { // Esta va a ser la clase que diriga todo , va a asignar las velocidades a cada personaje ya que conoce tablero fantastma y pacman 
+import java.util.ArrayList;
 
-private Pacman pacman;  // conocimiento de pacman 
-private Tablero mapa;   // conocimiento de tablero
-private Fantasma ghost; // conocimiento de fantasma 
-private Direccion direcciones; // le damos conocimiento a juego de la clase direccion para poder hacer el movimiento random de los fantasmas
+public class Juego { 
 
-// otros atributos necesarios para nuestros metodos
+private Pacman pacman;  
+private Tablero mapa;   
+private Direccion direcciones; 
+private Fantasma fantasma;
+private ArrayList <Fantasma> fantasmas ;
 
+// -----------INICIALIZAR------------------
 
+public Juego(){ 
 
-public Juego(){ // le damos vida a nuestros atributos  (inicializamos) 
-
-this.pacman = new Pacman();
+this.pacman = new Pacman(direcciones.randomDireccion(), new Coordenadas(1, 1), new Coordenadas(1, 1));
 this.mapa = new Tablero();
-this.ghost = new Fantasma();
+
+this.fantasmas = new ArrayList<>();
+fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(10, 8), new Coordenadas(10, 8)));
+fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(11, 8), new Coordenadas(11, 8)));
+fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(10, 7), new Coordenadas(10, 7)));
+fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(11, 7), new Coordenadas(11, 7)));
 
 }
 
-// METODO PARA QUE PANEL PUEDA ACCEDER A METODOS DE TABLERO
+// GETTERS PARA EL PANEL  
+
 public Tablero getMapa() {
     return mapa;
 }
 public Pacman getPacman() {
     return pacman;
 }
-public Fantasma getGhost() {
-    return ghost;
+public ArrayList<Fantasma> getFantasmas() {
+    return fantasmas;
 }
-private void win(){ // metodo para verificar victoria en cada frame
+
+// METODOS DEL JUEGO 
+
+private void win(){ 
 
     if(mapa.gana()){
         System.out.println("VICTORIA VICTORIAAA");
     }
 }
 
-private void pacmanComePoder(){
-    if(mapa.hayPoder(pacman.pacmanActual())){ // si hay un poder donde esta el pacman actual los fantasmas se asustan 
-        ghost.seASustan();
-    }
+// -------------- GAME OVER ---------------
+
+private Boolean gameOver(){
+
+Boolean muerte = false ;
+Coordenadas actual = pacman.pacmanActual();
+
+for(int i=0;i < fantasmas.size() ; i++ ){
+Coordenadas fantasmaUbi = fantasmas.get(i).ubicacion();
+Fantasma f = fantasmas.get(i);
+
+if(fantasmaUbi.getX() == actual.getX() && fantasmaUbi.getY() == actual.getY()){
+
+if(!f.Asustados()){
+    muerte = true ;
+    break;
 }
-// vamos a hacer el metodo que nos permita cruzar los portales
-private void cruzarPortales(Coordenadas c){
 
-        Coordenadas cruzoDerecha  = new Coordenadas(1,c.getY()); // se calculan las coordenadas dependiendo de que portal sea
-        Coordenadas cruzoIzquierda  = new Coordenadas(20,c.getY());
+else f.fantasmaMuere();
 
-    if(mapa.hayPortalDerecha(c) && !mapa.noValido(cruzoDerecha)){ // se verifica si fue portal derecha y si la posicion calculada es valida dentro del mapa
-        
-        pacman.setPosicion(cruzoDerecha);
-
-    }
+}
+}
+return muerte;
+}
     
-    if(mapa.hayPortalIzquierda(c) && !mapa.noValido(cruzoIzquierda)){ // se verifica si fue portal de izquierda y si la posicion calculada es valida 
-        
-        pacman.setPosicion(cruzoIzquierda);
+// --------------CRUZAR PORTAL------------------
 
-    }
+public void cruzarPortal(Direccion futura){
 
-}
+    Coordenadas actual = pacman.pacmanActual();
 
-// GAMEOVER / COMPRUEBA SI HAY GAMEOVER O SI PACMAN SE COME UN FANTASMA DEPENDIENDO DEL ESTADO 
+        if(actual.getX() == 0 && futura == Direccion.IZQUIERDA){
 
-private boolean gameOver(Coordenadas c,boolean asustados){ 
-
-    if(!asustados){
-        for(int i=0;i<ghost.cantidadFantasmas();i++){
-            Coordenadas fantasma = ghost.accederFantasma(i);
-
-            if(c.getY()==fantasma.getY() && c.getX()==fantasma.getX()){
-
-                
-                return true;
-            }
-    }
-}
-    else if(asustados){
-
-        for(int i=0;i<ghost.cantidadFantasmas();i++){
-            Coordenadas fantasma = ghost.accederFantasma(i);
-
-            if(c.getY()==fantasma.getY() && c.getX()==fantasma.getX()){
-
-                ghost.fantasmaMuere(i);
-
-                return false;
-            }         
+                pacman.setPosicion(new Coordenadas(20, actual.getY()));
         }
-}
-    
-    return false;
-}
+        else if(actual.getX() == 21 && futura == Direccion.DERECHA){
+
+                pacman.setPosicion(new Coordenadas(1, actual.getY()));
+        }
+}   
+
+// -------------- MOVIMIENTO PACMAN ---------------------
 
 private void pacmanMover(Direccion direccionFutura){
+ 
     if (direccionFutura == null) return;
-
     Direccion actual = pacman.dirActual();
     Coordenadas futuro = pacman.pacmanFuturo(direccionFutura);
     if (actual == null) actual = direccionFutura;
     Coordenadas futuroConDireccionActual = pacman.pacmanFuturo(actual);
-
     
+    cruzarPortal(direccionFutura);
 
-     if (!mapa.hayMuro(futuro)){
+    if (!mapa.hayMuro(futuro)&& !mapa.noValido(futuro)){
 
-        pacman.mover(direccionFutura); // si no hay muro se hace caso al parametro y se va en esa direccion 
+        pacman.mover(direccionFutura); 
     }
 
-     else if(!mapa.hayMuro(futuroConDireccionActual)){
+     else if(!mapa.hayMuro(futuroConDireccionActual)&&!mapa.noValido(futuroConDireccionActual)){
         
-        pacman.mover(actual); // si hay muro se sigue moviendo en la direccion en que iba
+        pacman.mover(actual); 
     }
     }
 
-    private void fantasmasMover(){
+//--------------MOVIMIENTO FANTASMAS------------
 
-        Direccion direccionFutura = direcciones.randomDireccion();
-        Direccion actual = ghost.dirActualGhost();
-        Coordenadas futuro = ghost.nuevoFantasma(direccionFutura);
-        Coordenadas futuroConDireccionActual = ghost.nuevoFantasma(actual);
+private void fantasmasMover(){
 
-        if (!mapa.hayMuro(futuro)){
+for(int i=0; i<fantasmas.size(); i++){
 
-        ghost.mover(direccionFutura); // si no hay muro se hace caso al parametro y se va en esa direccion 
+Direccion DirActual = fantasmas.get(i).dirActualFantasma();
+Fantasma fActual = fantasmas.get(i);
+Coordenadas futuro = fActual.nuevoFantasma(DirActual);
+
+if(!mapa.hayMuro(futuro) && !mapa.noValido(futuro)){
+    fActual.mover(DirActual);
+}
+else if(mapa.hayMuro(futuro) && !mapa.noValido(futuro)){
+    fActual.setDireccion_actual(direcciones.randomDireccion());
+}
+}
+}
+ 
+// ------------- CONSUME OBJETOS MAPA-----------
+
+   private void pacmanComePoder(){
+
+    Coordenadas actual = pacman.pacmanActual();
+    if(mapa.hayPoder(actual)){ 
+        for(int i=0;i < fantasmas.size(); i++){
+        fantasmas.get(i).seASustan();
     }
+        mapa.pacmanComioPoder(actual);
+    }
+}
 
-     else if(!mapa.hayMuro(futuroConDireccionActual)){
-        
-        ghost.mover(actual); // si hay muro se sigue moviendo en la direccion en que iba 
-    }
-    }
-    private void pacmanPoderCome(Coordenadas c){
-        if(mapa.hayPoder(c)){
-            mapa.pacmanComioPoder(c);
-            
-        }
-        
-    }
+    private void pacmanComePuntos(){
 
-    private void pacmanComePuntos(Coordenadas c){
-        if(mapa.hayPepita(c)){
-            mapa.pacmanPaso(c);
+        Coordenadas actual = pacman.pacmanActual();
+        if(mapa.hayPepita(actual)){
+            mapa.pacmanPaso(actual);
         }
     }
 
@@ -149,23 +154,13 @@ private void pacmanMover(Direccion direccionFutura){
 
     public void Actualizar(Direccion direccionTeclado){
 
-        boolean estado = ghost.estadoFantasma();
-        Direccion direccionFutura = direccionTeclado;
-        Coordenadas pacmanActual = pacman.pacmanActual();
-        System.out.println(mapa.puntosJuego());
-        pacmanMover(direccionFutura); // movemos a pacman
-        cruzarPortales(pacmanActual);   // verificamos si estamos cruzando un portal 
-        //fantasmasMover(); // movemos a los fantasmas
-        pacmanComePuntos(pacmanActual); 
-        pacmanPoderCome(pacmanActual);
-        
-        pacmanComePoder();              // verificamos si hay cambio de estado                                    
-        gameOver(pacmanActual, estado); // verificamos gameover
-        win();                          // verificamos victoria 
-
-
-
-
+        Direccion direccionFutura = direccionTeclado;      
+        pacmanMover(direccionFutura); 
+        fantasmasMover();
+        pacmanComePoder();
+        pacmanComePuntos();
+        gameOver();
+        win();                          
     }
         
     }

@@ -3,9 +3,11 @@ package com.nicolas.Pacman.view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import com.nicolas.Pacman.model.Fantasma;
 import com.nicolas.Pacman.model.Juego;
 
 public class Panel extends JPanel{
@@ -77,19 +79,20 @@ private void dibujarEntidades(Graphics g){
 
 int pacmanY = modelo.getPacman().pacmanActual().getY();
 int pacmanX = modelo.getPacman().pacmanActual().getX();
+ArrayList<Fantasma> fantasmas = modelo.getFantasmas();
 
 g.setColor(Color.yellow);
 g.fillOval(pacmanX*tamañoPixel+2, pacmanY*tamañoPixel+2, 14, 14);
 
 g.setColor(Color.CYAN);
-int cantidadFantasmas = modelo.getGhost().cantidadFantasmas();
+int cantidadFantasmas = fantasmas.size();
 
-for(int i=0;i<cantidadFantasmas;i++){
+for(int i=0; i<cantidadFantasmas; i++){
 
-    int GhostY = modelo.getGhost().accederFantasma(i).getY();
-    int GhostX = modelo.getGhost().accederFantasma(i).getX();
+    int x = fantasmas.get(i).posicion.getX();
+    int y = fantasmas.get(i).posicion.getY(); 
 
-    g.fillOval(GhostX*tamañoPixel+2, GhostY*tamañoPixel+2, 14, 14);
+    g.fillOval(x*tamañoPixel+2, x*tamañoPixel+2, 14, 14);
     
 }
 
