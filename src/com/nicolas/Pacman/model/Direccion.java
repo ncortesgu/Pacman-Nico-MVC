@@ -8,12 +8,14 @@ import java.util.Random;
     IZQUIERDA,
     DERECHA;
 
+    public static final Random i = new Random();
+
     // vamos a crear un metodo que nos devuelva una direccion al azar
 
     public static Direccion randomDireccion(){
 
         // declaramos un numero random y luego asignamos a nuestra variable numero un numero random de 1-4 se le suma uno 
-        Random i = new Random();
+        
         int numero = i.nextInt(4)+1;
 
         switch (numero) {

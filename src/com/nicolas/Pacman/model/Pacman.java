@@ -2,10 +2,12 @@ package com.nicolas.Pacman.model;
 
 public class Pacman extends Personaje {
      
-    // Constructor para inicializar las variables 
+    // Constructor para inicializar las variables
+    
 
     public Pacman(Direccion direccion_actual, Coordenadas posicion, Coordenadas spawn) {
         super(direccion_actual, posicion, spawn);
+        
         
     }
     

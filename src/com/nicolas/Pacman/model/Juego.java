@@ -6,22 +6,21 @@ public class Juego {
 
 private Pacman pacman;  
 private Tablero mapa;   
-private Direccion direcciones; 
-private Fantasma fantasma;
 private ArrayList <Fantasma> fantasmas ;
+private int contador = 0;
 
 // -----------INICIALIZAR------------------
 
 public Juego(){ 
 
-this.pacman = new Pacman(direcciones.randomDireccion(), new Coordenadas(1, 1), new Coordenadas(1, 1));
+this.pacman = new Pacman(Direccion.randomDireccion(), new Coordenadas(1, 1), new Coordenadas(1, 1));
 this.mapa = new Tablero();
 
 this.fantasmas = new ArrayList<>();
-fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(10, 8), new Coordenadas(10, 8)));
-fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(11, 8), new Coordenadas(11, 8)));
-fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(10, 7), new Coordenadas(10, 7)));
-fantasmas.add(new Fantasma(direcciones.randomDireccion(), new Coordenadas(11, 7), new Coordenadas(11, 7)));
+fantasmas.add(new Fantasma(Direccion.randomDireccion(), new Coordenadas(10, 7), new Coordenadas(10, 7)));
+fantasmas.add(new Fantasma(Direccion.randomDireccion(), new Coordenadas(10, 8), new Coordenadas(11, 8)));
+fantasmas.add(new Fantasma(Direccion.randomDireccion(), new Coordenadas(11, 7), new Coordenadas(10, 7)));
+fantasmas.add(new Fantasma(Direccion.randomDireccion(), new Coordenadas(11, 8), new Coordenadas(11, 7)));
 
 }
 
@@ -64,42 +63,39 @@ if(!f.Asustados()){
     break;
 }
 
-else f.fantasmaMuere();
+else  f.fantasmaMuere();
+    
 
 }
 }
 return muerte;
 }
     
-// --------------CRUZAR PORTAL------------------
-
-public void cruzarPortal(Direccion futura){
-
-    Coordenadas actual = pacman.pacmanActual();
-
-        if(actual.getX() == 0 && futura == Direccion.IZQUIERDA){
-
-                pacman.setPosicion(new Coordenadas(20, actual.getY()));
-        }
-        else if(actual.getX() == 21 && futura == Direccion.DERECHA){
-
-                pacman.setPosicion(new Coordenadas(1, actual.getY()));
-        }
-}   
 
 // -------------- MOVIMIENTO PACMAN ---------------------
 
 private void pacmanMover(Direccion direccionFutura){
  
+    Coordenadas cordPacman = pacman.pacmanActual();
     if (direccionFutura == null) return;
     Direccion actual = pacman.dirActual();
     Coordenadas futuro = pacman.pacmanFuturo(direccionFutura);
     if (actual == null) actual = direccionFutura;
     Coordenadas futuroConDireccionActual = pacman.pacmanFuturo(actual);
     
-    cruzarPortal(direccionFutura);
+    // ------------------CRUZAR PORTALES----------------------- 
 
-    if (!mapa.hayMuro(futuro)&& !mapa.noValido(futuro)){
+    if(cordPacman.getX() == 0 && actual == Direccion.IZQUIERDA){
+        pacman.setPosicion(new Coordenadas(20, cordPacman.getY()));
+    }
+
+    else if(cordPacman.getX() == 21 && actual == Direccion.DERECHA){
+        pacman.setPosicion(new Coordenadas(1, cordPacman.getY()));
+    }
+
+    //-----------------VALIDACION DE MUROS----------------------
+
+    else if(!mapa.hayMuro(futuro)&& !mapa.noValido(futuro)){
 
         pacman.mover(direccionFutura); 
     }
@@ -110,25 +106,33 @@ private void pacmanMover(Direccion direccionFutura){
     }
     }
 
+
+
 //--------------MOVIMIENTO FANTASMAS------------
 
-private void fantasmasMover(){
+private void moverFantasmas(){
+   
+for(int i=0 ; i < fantasmas.size() ; i++){
 
-for(int i=0; i<fantasmas.size(); i++){
+Fantasma f = fantasmas.get(i);
+Direccion decidida = f.dirActualFantasma();
+Coordenadas Cordfantasma = f.ubicacion();
 
-Direccion DirActual = fantasmas.get(i).dirActualFantasma();
-Fantasma fActual = fantasmas.get(i);
-Coordenadas futuro = fActual.nuevoFantasma(DirActual);
+if(!f.muertos()){
+if(mapa.hayMuro(f.nuevoFantasma(decidida)) || mapa.hayInterseccion(Cordfantasma)){
 
-if(!mapa.hayMuro(futuro) && !mapa.noValido(futuro)){
-    fActual.mover(DirActual);
+do {
+    decidida = Direccion.randomDireccion();
+} while (mapa.hayMuro(f.nuevoFantasma(decidida)));
+
+f.setDireccion_actual(decidida);
 }
-else if(mapa.hayMuro(futuro) && !mapa.noValido(futuro)){
-    fActual.setDireccion_actual(direcciones.randomDireccion());
+f.mover(decidida);
 }
 }
+
 }
- 
+
 // ------------- CONSUME OBJETOS MAPA-----------
 
    private void pacmanComePoder(){
@@ -145,20 +149,43 @@ else if(mapa.hayMuro(futuro) && !mapa.noValido(futuro)){
     private void pacmanComePuntos(){
 
         Coordenadas actual = pacman.pacmanActual();
-        if(mapa.hayPepita(actual)){
+        if(mapa.hayPepita(actual) || mapa.hayInterseccion(actual)){
             mapa.pacmanPaso(actual);
+            
         }
     }
 
-// FRAME DEL JUEGO 
+//--------------------TEMPORIZADORES-----------------------
+
+private void fantasmaSpawn(){
+    for(int i=0;i<fantasmas.size() ; i++){
+        Fantasma f = fantasmas.get(i);
+        f.temporizadorSpawn();
+    }
+}
+
+private void temporizadorPoder(){
+    for(int i=0; i<fantasmas.size() ;i++){
+        fantasmas.get(i).temporizadorPoder();
+    }
+}
+
+private void aumentar(){
+    contador++;
+}
+
+// ------------------FRAME DEL JUEGO---------------------- 
 
     public void Actualizar(Direccion direccionTeclado){
 
+        aumentar();
         Direccion direccionFutura = direccionTeclado;      
-        pacmanMover(direccionFutura); 
-        fantasmasMover();
+        if(contador%2==0)pacmanMover(direccionFutura); 
+        if(contador %3 == 0)moverFantasmas();
         pacmanComePoder();
         pacmanComePuntos();
+        fantasmaSpawn();
+        temporizadorPoder();
         gameOver();
         win();                          
     }

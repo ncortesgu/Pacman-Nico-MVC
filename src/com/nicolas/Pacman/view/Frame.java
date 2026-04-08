@@ -28,7 +28,7 @@ public class Frame extends JFrame{
         this.requestFocusInWindow();
         
 
-Timer timer = new Timer(100, new ActionListener() {
+Timer timer = new Timer(50, new ActionListener() {
     @Override
     public void actionPerformed(ActionEvent e) {
         

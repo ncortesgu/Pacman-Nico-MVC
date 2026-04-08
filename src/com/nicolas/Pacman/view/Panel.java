@@ -54,7 +54,7 @@ for(int i=0;i<filas;i++){
             g.setColor(Color.MAGENTA);
             g.fillRect(x, y, tamañoPixel, tamañoPixel);
         }
-        else if(celda=='.'){
+        else if(celda=='.' || celda == 'I'){
             g.setColor(Color.yellow);
             g.fillOval(x+5, y+5, 5, 5);
            
@@ -89,13 +89,25 @@ int cantidadFantasmas = fantasmas.size();
 
 for(int i=0; i<cantidadFantasmas; i++){
 
+    Fantasma f = fantasmas.get(i);
+
+    if(!f.muertos() && !f.Asustados()){
+
     int x = fantasmas.get(i).posicion.getX();
     int y = fantasmas.get(i).posicion.getY(); 
 
-    g.fillOval(x*tamañoPixel+2, x*tamañoPixel+2, 14, 14);
-    
-}
+    g.fillOval(x*tamañoPixel+2, y*tamañoPixel+2, 14, 14);
+    }
 
+    else if(!f.muertos() && f.Asustados()){
+        g.setColor(Color.RED);
+        int x = fantasmas.get(i).posicion.getX();
+    int y = fantasmas.get(i).posicion.getY(); 
+
+    g.fillOval(x*tamañoPixel+2, y*tamañoPixel+2, 14, 14);
+    
+    }
+}
 }
 
 }
